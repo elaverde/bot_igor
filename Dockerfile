@@ -13,6 +13,13 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt watchfiles  
 
+# Crear carpetas necesarias
+RUN mkdir -p storage/cuentas_de_cobro
+RUN mkdir -p storage/plantillas
+
+# Copiar archivos de plantillas desde la máquina al contenedor
+COPY torage/plantillas/ storage/plantillas/
+
 # Copiar código fuente
 COPY . .
 
