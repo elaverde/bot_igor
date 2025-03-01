@@ -31,8 +31,8 @@ def generar_cuenta(message):
 
     print(f"📌 Datos recibidos: {datos}")  # ✅ Verifica que los datos no estén vacíos
 
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    doc = Uground(base_dir)
+    # base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    doc = Uground()
     
     # Verificar que los datos lleguen correctamente a la función
     doc.leer_parametros(datos["fecha"], datos["n_cobro"], datos["concepto"])

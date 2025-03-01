@@ -1,15 +1,22 @@
 import os
 import datetime
 from docxtpl import DocxTemplate
+from dotenv import load_dotenv
 import subprocess
+
+# Cargar .env desde la raíz del proyecto
+dotenv_path = os.path.join(os.path.dirname(__file__), "..", ".env")
+load_dotenv(dotenv_path)
+
+# Leer variables
+PATHDOCS = os.getenv("PATHDOCS")
 
 
 class Uground():
-    def __init__(self, base_dir):
+    def __init__(self):
         self.fecha = ""
         self.n_cobro = ""
         self.concepto = ""
-        self.base_dir = base_dir
 
     def leer_parametros(self, fecha="", n_cobro="", concepto=""):
         # si la fecha esta vacia, se asigna la fecha del sistema
@@ -67,18 +74,16 @@ class Uground():
 
         #Convertimos self.fecha a mes y ano tener cuenta que la fecha puede ser ingresada dd-mm-yyyy o por sistema
         nombre_mes, ano = self.extraer_mes_anio(self.fecha)
-        print(self.base_dir+"/storage/plantillas/PLANTILLA_CUENTA_COBRO_UGROUND.docx")
-        doc = DocxTemplate(self.base_dir+"/storage/plantillas/PLANTILLA_CUENTA_COBRO_UGROUND.docx")
+        doc = DocxTemplate(PATHDOCS+"/storage/plantillas/PLANTILLA_CUENTA_COBRO_UGROUND.docx")
         context = {
             'FECHA': self.fecha,
             'N_COBRO':self.n_cobro,
             'CONCEPTO':self.concepto
         }
-        print(context)
         doc.render(context)
-        doc.save(self.base_dir+'/storage/cuentas_de_cobro/UGROUND-Edilson-Laverde-Molina-'+nombre_mes+'-'+ano+'.docx')
-        self.convert_to_pdf(self.base_dir+'/storage/cuentas_de_cobro/UGROUND-Edilson-Laverde-Molina-'+nombre_mes+'-'+ano+'.docx')
-        return self.base_dir+'/storage/cuentas_de_cobro/UGROUND-Edilson-Laverde-Molina-'+nombre_mes+'-'+ano+'.pdf'
+        doc.save(PATHDOCS+'/storage/cuentas_de_cobro/UGROUND-Edilson-Laverde-Molina-'+nombre_mes+'-'+ano+'.docx')
+        self.convert_to_pdf(PATHDOCS+'/storage/cuentas_de_cobro/UGROUND-Edilson-Laverde-Molina-'+nombre_mes+'-'+ano+'.docx')
+        return PATHDOCS+'/storage/cuentas_de_cobro/UGROUND-Edilson-Laverde-Molina-'+nombre_mes+'-'+ano+'.pdf'
 
 
     
