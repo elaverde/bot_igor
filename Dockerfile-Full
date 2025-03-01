@@ -25,3 +25,4 @@ RUN mkdir -p /tmp/.config/libreoffice && chmod -R 777 /tmp/.config
 
 # Comando para reiniciar el bot automáticamente en cambios
 CMD ["watchmedo", "auto-restart", "--patterns=*.py", "--recursive", "--", "python", "main.py"]
+docker image prune -a -f
