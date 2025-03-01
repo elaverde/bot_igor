@@ -1,0 +1,41 @@
+# 🔹 Archivos y carpetas de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+*.env
+
+# 🔹 Configuración y dependencias
+pip-log.txt
+pip-delete-this-directory.txt
+*.log
+
+# 🔹 Archivos de compilación
+*.so
+*.DS_Store
+*.egg-info/
+*.egg
+
+# 🔹 Configuración de IDEs y editores
+.vscode/
+.idea/
+*.iml
+
+# 🔹 Archivos generados por Docker
+.Dockerfile.swp
+docker-compose.override.yml
+docker-compose.override.yaml
+*.dockerignore
+
+# 🔹 Archivos generados por el bot
+storage/
+output/
+*.db
+*.sqlite3
+
+# 🔹 CapRover (Ignorar despliegues locales)
+captain-definition
+caprover/

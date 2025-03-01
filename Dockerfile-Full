@@ -1,0 +1,27 @@
+FROM python:3.9
+
+WORKDIR /app
+
+# Instalar dependencias del sistema necesarias para LibreOffice y conversión de documentos
+RUN apt-get update && apt-get install -y \
+    libreoffice \
+    unoconv \
+    fonts-dejavu \
+    && apt-get clean
+
+# Copia e instala dependencias de Python
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Instala watchfiles para recargar automáticamente (opcional)
+RUN pip install watchfiles
+
+# Copia el código fuente
+COPY . .
+
+# Configurar LibreOffice para convertir archivos en modo headless
+ENV HOME=/tmp
+RUN mkdir -p /tmp/.config/libreoffice && chmod -R 777 /tmp/.config
+
+# Comando para reiniciar el bot automáticamente en cambios
+CMD ["watchmedo", "auto-restart", "--patterns=*.py", "--recursive", "--", "python", "main.py"]
