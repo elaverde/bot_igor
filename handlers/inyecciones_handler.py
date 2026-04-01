@@ -1,27 +1,63 @@
-import os
+import datetime
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from config import bot
 from libs.pago_inyecciones import PagoInyecciones
 
-# Diccionario para guardar los datos temporales de cada usuario
 user_data = {}
+
+MESES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+         "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
 
 def ask_mes(message):
     chat_id = message.chat.id
     user_data[chat_id] = {}
-    bot.send_message(chat_id, "📅 Ingresa el mes (nombre o número, ej: 'marzo' o '03'):")
-    bot.register_next_step_handler(message, ask_anio)
 
-def ask_anio(message):
-    chat_id = message.chat.id
-    user_data[chat_id]["mes"] = message.text
-    bot.send_message(chat_id, "🔢 Ingresa el año (ej: 2025):")
-    bot.register_next_step_handler(message, calcular_pago)
+    markup = InlineKeyboardMarkup(row_width=3)
+    botones = [InlineKeyboardButton(m, callback_data=f"inj_mes_{m}") for m in MESES]
+    markup.add(*botones)
+    bot.send_message(chat_id, "📅 Selecciona el mes:", reply_markup=markup)
 
-def calcular_pago(message):
+def handle_mes_callback(call):
+    chat_id = call.message.chat.id
+    bot.answer_callback_query(call.id)
+    mes = call.data.replace("inj_mes_", "")
+    user_data[chat_id]["mes"] = mes
+    bot.edit_message_text(f"📅 Mes: {mes}", chat_id, call.message.message_id)
+    _ask_anio(call.message, chat_id)
+
+def _ask_anio(message, chat_id):
+    anio_actual = datetime.datetime.now().year
+    markup = InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton(f"📆 {anio_actual}", callback_data=f"inj_anio_{anio_actual}"),
+        InlineKeyboardButton("✏️ Ingresar año", callback_data="inj_anio_manual")
+    )
+    bot.send_message(chat_id, "¿Qué año?", reply_markup=markup)
+
+def handle_anio_callback(call):
+    chat_id = call.message.chat.id
+    bot.answer_callback_query(call.id)
+
+    if call.data == "inj_anio_manual":
+        bot.edit_message_text("✏️ Ingresa el año (ej: 2025):", chat_id, call.message.message_id)
+        bot.register_next_step_handler(call.message, recibir_anio_manual)
+    else:
+        anio = int(call.data.replace("inj_anio_", ""))
+        bot.edit_message_text(f"📆 Año: {anio}", chat_id, call.message.message_id)
+        _calcular(chat_id, anio, call.message)
+
+def recibir_anio_manual(message):
     chat_id = message.chat.id
-    user_data[chat_id]["anio"] = int(message.text)
+    try:
+        anio = int(message.text)
+        _calcular(chat_id, anio, message)
+    except ValueError:
+        bot.send_message(chat_id, "⚠️ Año inválido, ingresa un número (ej: 2025):")
+        bot.register_next_step_handler(message, recibir_anio_manual)
+
+def _calcular(chat_id, anio, message):
     datos = user_data[chat_id]
-
+    datos["anio"] = anio
     try:
         pago = PagoInyecciones(datos["mes"], datos["anio"])
         resultado = pago.calcular_pago()
@@ -29,6 +65,5 @@ def calcular_pago(message):
     except ValueError as e:
         bot.send_message(chat_id, f"⚠️ Error: {str(e)}")
 
-# Asignar el manejador al comando /pago_inyecciones
 def handle_pagos_inyecciones(message):
     ask_mes(message)

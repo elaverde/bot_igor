@@ -1,5 +1,6 @@
 import os
 import datetime
+import calendar
 from docxtpl import DocxTemplate
 from dotenv import load_dotenv
 import subprocess
@@ -24,13 +25,13 @@ class Uground():
         self.n_cobro = n_cobro
         self.concepto = concepto
         
-        if self.fecha == "":
+        if self.fecha == "" or self.fecha.lower() == "hoy":
             hoy = datetime.datetime.now()
-            #ponemos el mes en letras
             meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
-            mes = datetime.datetime.now().month
+            mes = hoy.month
             nombre_mes = meses[mes - 1]
-            self.fecha = "01 "+nombre_mes+" de "+hoy.strftime("%Y")
+            ultimo_dia = calendar.monthrange(hoy.year, mes)[1]
+            self.fecha = f"{ultimo_dia:02d} {nombre_mes} de {hoy.strftime('%Y')}"
 
     def extraer_mes_anio(self,fecha):
         # Si la fecha es del sistema (Ej: "01 Febrero de 2024")
@@ -81,9 +82,10 @@ class Uground():
             'CONCEPTO':self.concepto
         }
         doc.render(context)
-        doc.save(PATHDOCS+'/storage/cuentas_de_cobro/UGROUND-Edilson-Laverde-Molina-'+nombre_mes+'-'+ano+'.docx')
-        self.convert_to_pdf(PATHDOCS+'/storage/cuentas_de_cobro/UGROUND-Edilson-Laverde-Molina-'+nombre_mes+'-'+ano+'.docx')
-        return PATHDOCS+'/storage/cuentas_de_cobro/UGROUND-Edilson-Laverde-Molina-'+nombre_mes+'-'+ano+'.pdf'
+        nombre_archivo = f'UGROUND-N-{self.n_cobro}-Edilson-Laverde-Molina-{nombre_mes}-{ano}'
+        doc.save(PATHDOCS+f'/storage/cuentas_de_cobro/{nombre_archivo}.docx')
+        self.convert_to_pdf(PATHDOCS+f'/storage/cuentas_de_cobro/{nombre_archivo}.docx')
+        return PATHDOCS+f'/storage/cuentas_de_cobro/{nombre_archivo}.pdf'
 
 
     
